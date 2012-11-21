@@ -1,0 +1,18 @@
+doctype 5
+html(lang="en")
+	head
+		title Index
+	body
+		h1 Welcome #{username.user}
+		#container
+			table
+				tr
+					td
+						textarea(id="chat-room")
+						input(name="username", placeholder="put your nickname or blank", style="display:block;")
+						input(type="submit", value="Submit")
+					td
+						form(action="/answer", method="post")
+						each question, i in qa
+							label(style="display:block;") #{question.q}
+							input(type="text",name=qa-i)

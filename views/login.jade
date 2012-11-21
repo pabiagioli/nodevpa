@@ -1,0 +1,12 @@
+doctype 5
+html(lang="en")
+	head
+		title Login
+	body
+		h1 Login to the Lunch and learn survey
+		#container
+			form(action="/login", method="post")
+				label Nickname
+				input(name="username", placeholder="put your nickname or blank")
+				input(type="hidden",name="password", value="allIn")
+				input(type="submit", value="Submit")
