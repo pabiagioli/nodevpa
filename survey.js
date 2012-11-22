@@ -30,7 +30,7 @@ var DAOimpl = function(url,dbname,dbuser,dbpass){
 	
 };
 
-var DAO = new DAOimpl('localhost', 'lunch_and_learn_survey',null,null);
+var DAO = new DAOimpl('localhost', 'nodevpa',null,null);
 
 
 var Schema = mongoose.Schema;

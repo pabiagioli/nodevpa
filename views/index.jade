@@ -10,14 +10,14 @@ html(lang="en")
 				tr
 					td	
 						form(onsubmit="javascript:send(this);return false;")
-							textarea(id="chat-room",)
+							textarea(id="chat-room", style="margin: 2px; width: 495px; height:300px;")
 							input(id="say", name="say", placeholder="say something", style="display:block;")
 							input(type="submit", value="Submit")
 					td
 						form(action="/answer", onsubmit="javascript:send(this);return false;")
-						each question, i in qa
-							label(style="display:block;") #{question.q}
-							input(type="text",name="qa-"+i)
+							each question, i in qa
+								label(style="display:block;") #{question.q}
+								input(type="text",name="qa-"+i)
 		script(src="./jquery-1.7.1.min.js")
 		script(src="/socket.io/socket.io.js")
 		script
