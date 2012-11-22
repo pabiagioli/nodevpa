@@ -2,17 +2,32 @@ doctype 5
 html(lang="en")
 	head
 		title Index
+		script(src="./modernizr-2.5.3.min.js")
 	body
 		h1 Welcome #{username.user}
 		#container
 			table
 				tr
+					td	
+						form(onsubmit="javascript:send(this);return false;")
+							textarea(id="chat-room",)
+							input(id="say", name="say", placeholder="say something", style="display:block;")
+							input(type="submit", value="Submit")
 					td
-						textarea(id="chat-room")
-						input(name="username", placeholder="put your nickname or blank", style="display:block;")
-						input(type="submit", value="Submit")
-					td
-						form(action="/answer", method="post")
+						form(action="/answer", onsubmit="javascript:send(this);return false;")
 						each question, i in qa
 							label(style="display:block;") #{question.q}
-							input(type="text",name=qa-i)
+							input(type="text",name="qa-"+i)
+		script(src="./jquery-1.7.1.min.js")
+		script(src="/socket.io/socket.io.js")
+		script
+			//Connect to Node.js server at port 8080
+			var socket = io.connect('http://localhost:8080/chat');
+			function getMessage(data){
+				$('#chat-room').append("["+data.nick+"]: "+data.my+'\n');
+			}
+			function send(message){
+				socket.emit('text-message-req', { nick: "#{username.user}"  , my: $('#say').val() });
+			}
+			//Custom response events
+			socket.on('text-message-res', getMessage);

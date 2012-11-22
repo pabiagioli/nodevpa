@@ -1,6 +1,8 @@
 var mongoose = require('mongoose'),
 	express = require('express'),
-	nodemon = require('nodemon'),
+	socketio = require('socket.io'),
+	path = require('path'),
+	//nodemon = require('nodemon'),
 	passport = require('passport'),
 	LocalStrategy = require('passport-local').Strategy,
 	ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn,
@@ -62,7 +64,7 @@ question2.save();
 
 app.configure(function() {
   app.use(express.logger());
-  app.use(express.static('public'));
+  app.use(express.static(path.join(__dirname, 'public')));
   app.use(express.cookieParser());
   app.use(express.bodyParser());
   app.use(express.session({ secret: 'secret' }));
@@ -124,3 +126,16 @@ app.post('/login',
 
 var server = app.listen(8080);
 console.log('Express server started on %s:%s',server.address().address,server.address().port);
+
+function echoMessage(socket, data){
+	socket.emit('text-message-res', data);
+}
+
+var io = socketio.listen(server);
+var chat = io.of('/chat')
+  .on('connection', function (socket) {
+		//"socket" es el particular y "chat" es el gral
+		socket.on('text-message-req', function(data){ 
+			echoMessage(chat,data);
+		});
+  });
