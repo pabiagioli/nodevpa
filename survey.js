@@ -62,7 +62,7 @@ var question2 = new QA({
 QA.find({}, function (err,docs){
 	if(err)
 		console.log(err);
-	if(docs == null){
+	if(docs == null || docs.length < 1){
 		question1.save();
 		question2.save();
 	}
@@ -99,12 +99,7 @@ passport.use(new LocalStrategy(
 			if (err){
 				console.log(err);
 			}else{
-				var guy = new Attendee({
-					nickname: username,
-					qas: docs
-				});
-				//try to save the guy
-				guy.save();
+				
 				return done(null,{user:username});
 			}
 		});
@@ -159,14 +154,20 @@ function processSurvey(socket,data){
 		}else{
 			var qaList = [];
 			for(var i= 0; i<data.answers.length;i++){
-				qa = new QA({q:docs[i].q , a:data.answers[i].value})
+				qa = new QA({q:docs[i].q , a:data.answers[i].value});
 				qaList.push(qa);
 			}
 			console.log("%s", JSON.stringify({
-				nick: data.nick,
+				nickname: data.nick,
 				qas: qaList
 			}));
-			
+			var guy = new Attendee({
+					nickname: data.nick,
+					qas: qaList
+				});
+				//try to save the guy
+				guy.save();
+
 			//emit success message
 			socket.emit('text-message-res', { nick: data.nick  , my: "You just submited the survey! \nThanks for your input" })
 		}
@@ -189,5 +190,10 @@ var chat = io.of('/chat')
 	For ADMINS
   */
 app.get('/admin',function(req,res){
-	res.render('admin.jade', {username:req.user});
+	Attendee.find({}, function (err,docs){
+		if(err)
+			console.log(err);
+		res.send( JSON.stringify({username:req.user, QAs: docs}));
+	});
+	
 });

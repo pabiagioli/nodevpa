@@ -40,7 +40,7 @@ html(lang="en")
 			function survey(form){
 				if($(form).valid()){
 					console.log("%s",JSON.stringify({nick: "#{username.user}", answers: $(form).serializeArray() }));
-					//socket.emit('survey-input', {nick: "#{username.user}", answers: $(form).serializeArray() });
+					socket.emit('survey-input', {nick: "#{username.user}", answers: $(form).serializeArray() });
 				}else
 					alert("please complete the whole form");
 				return false;
