@@ -59,8 +59,16 @@ var question2 = new QA({
 	a: ''
 });
 
-question1.save();
-question2.save();
+QA.find({}, function (err,docs){
+	if(err)
+		console.log(err);
+	if(docs == null){
+		question1.save();
+		question2.save();
+	}
+});
+
+
 
 app.configure(function() {
   app.use(express.logger());
@@ -86,8 +94,21 @@ passport.use(new LocalStrategy(
 	function(username,password,done){
 		if(username == null)
 			console.log("error ocurred during auth");
+
+		QA.find({}, function(err,docs){
+			if (err){
+				console.log(err);
+			}else{
+				var guy = new Attendee({
+					nickname: username,
+					qas: docs
+				});
+				//try to save the guy
+				guy.save();
+				return done(null,{user:username});
+			}
+		});
 		
-		return done(null,{user:username});
 	}
 	));
 
@@ -131,11 +152,42 @@ function echoMessage(socket, data){
 	socket.emit('text-message-res', data);
 }
 
+function processSurvey(socket,data){
+	QA.find({}, function(err,docs){
+		if (err){
+			console.log(err);
+		}else{
+			var qaList = [];
+			for(var i= 0; i<data.answers.length;i++){
+				qa = new QA({q:docs[i].q , a:data.answers[i].value})
+				qaList.push(qa);
+			}
+			console.log("%s", JSON.stringify({
+				nick: data.nick,
+				qas: qaList
+			}));
+			
+			//emit success message
+			socket.emit('text-message-res', { nick: data.nick  , my: "You just submited the survey! \nThanks for your input" })
+		}
+	});
+}
+
 var io = socketio.listen(server);
 var chat = io.of('/chat')
   .on('connection', function (socket) {
 		//"socket" es el particular y "chat" es el gral
-		socket.on('text-message-req', function(data){ 
+		socket.on('text-message-req', function (data){ 
 			echoMessage(chat,data);
 		});
+		socket.on('survey-input',function (data){
+			processSurvey(chat,data);
+		});
   });
+
+  /**
+	For ADMINS
+  */
+app.get('/admin',function(req,res){
+	res.render('admin.jade', {username:req.user});
+});

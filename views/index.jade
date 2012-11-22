@@ -5,22 +5,28 @@ html(lang="en")
 		script(src="./modernizr-2.5.3.min.js")
 	body
 		h1 Welcome #{username.user}
+		h2 If you refresh the page messages will clear, so don't do it! ;-)
 		#container
 			table
 				tr
 					td	
 						form(onsubmit="javascript:send(this);return false;")
-							textarea(id="chat-room", style="margin: 2px; width: 495px; height:300px;")
+							textarea(id="chat-room", readonly = "readonly", cols="50", rows="20")
 							input(id="say", name="say", placeholder="say something", style="display:block;")
 							input(type="submit", value="Submit")
 					td
-						form(action="/answer", onsubmit="javascript:send(this);return false;")
+						form(id="survey-form", onsubmit="javascript:survey(this);return false;")
 							each question, i in qa
-								label(style="display:block;") #{question.q}
-								input(type="text",name="qa-"+i)
+								label(name="question-"+i, style="display:block;") #{question.q}
+								input(type="text",name="answer-"+i, class="required")
+							input(type="submit", value="Submit")
 		script(src="./jquery-1.7.1.min.js")
+		script(src="./jquery.validate.js")
 		script(src="/socket.io/socket.io.js")
 		script
+			$(document).ready(function(){
+				$("#survey-form").validate();
+			});
 			//Connect to Node.js server at port 8080
 			var socket = io.connect('http://localhost:8080/chat');
 			function getMessage(data){
@@ -31,3 +37,11 @@ html(lang="en")
 			}
 			//Custom response events
 			socket.on('text-message-res', getMessage);
+			function survey(form){
+				if($(form).valid()){
+					console.log("%s",JSON.stringify({nick: "#{username.user}", answers: $(form).serializeArray() }));
+					//socket.emit('survey-input', {nick: "#{username.user}", answers: $(form).serializeArray() });
+				}else
+					alert("please complete the whole form");
+				return false;
+			}
